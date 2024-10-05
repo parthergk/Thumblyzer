@@ -52,12 +52,14 @@ module.exports.POST = async function(req) {
 
   // Handle user creation event
   if (eventType === 'user.created') {
-    const { id: userId, username: userName } = evt.data;
+    const { id, username, email } = evt.data;
 
     try {
       // Set the user in the database
       const mongoUser = await setUser({
-        user: { userId, userName }
+        clerkId: id,
+        username: username,
+        email: email,
       });
 
       return NextResponse.json({ message: 'User created successfully', user: mongoUser });
