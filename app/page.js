@@ -1,5 +1,5 @@
 "use client";
-import UrlInput from "../components/UrlInput"
+import UrlInput from "@/components/UrlInput";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 
 export default function Home() {
