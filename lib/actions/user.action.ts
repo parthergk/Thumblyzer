@@ -1,7 +1,7 @@
 "use server";
-import User from "@/database/user.model";
+import User from "../../database/user.model";
 import { connectTodb } from "../mongoose";
-import { IUser } from "@/database/user.model"; // Assuming IUser is exported from the user model file
+import { IUser } from "../../database/user.model"; // Assuming IUser is exported from the user model file
 
 // Define an interface for the parameters passed to setUser
 interface SetUserParams {

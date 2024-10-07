@@ -1,10 +1,10 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { getThumbnailUrl, getAllThumbnail } from "@/lib/actions/thumbnail.action";
+import { getThumbnailUrl, getAllThumbnail } from "../lib/actions/thumbnail.action";
 
 const UrlInput = () => {
   const [url, setUrl] = useState("");
