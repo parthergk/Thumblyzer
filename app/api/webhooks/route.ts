@@ -57,12 +57,13 @@ console.log("Event Type", eventType);
   // Handle user creation event
   if (eventType === 'user.created') {
     const { id, username, email_addresses } = evt.data;
+    const email = email_addresses?.[0]?.email_address || 'test@gmail.com';
 
       // Set the user in the database
       const mongoUser = await setUser({
         clerkId: id,
-        username: username,
-        email: email_addresses?.[0].email_address,
+        username:username,
+        email:email
       });
 
       return NextResponse.json({message: 'OK', user: mongoUser})
