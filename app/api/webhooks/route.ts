@@ -1,3 +1,5 @@
+import { NextResponse } from 'next/server'
+import { setUser } from '../../../lib/actions/user.action'
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
@@ -46,12 +48,22 @@ export async function POST(req: Request) {
     })
   }
 
-  // Handle the webhook
-  const { id } = evt.data
-  const eventType = evt.type
-
-  console.log(`Webhook with an ID of ${id} and type of ${eventType}`)
-  console.log('Webhook body:', body)
+  const eventType = evt.type;
+  
+    // Handle user creation event
+    if (eventType === 'user.created') {
+      const { id, username, email_addresses } = evt.data;
+      const email = email_addresses?.[0]?.email_address || 'test@gmail.com';
+  
+        // Set the user in the database
+        const mongoUser = await setUser({
+          clerkId: id,
+          username:username,
+          email:email
+        });
+  
+        return NextResponse.json({message: 'OK', user: mongoUser})
+    }
 
   return new Response('', { status: 200 })
 }
