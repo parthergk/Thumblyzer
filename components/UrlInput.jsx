@@ -1,95 +1,85 @@
-"use client";
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Download, Zap } from 'lucide-react';
 
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { useState, useCallback, useEffect } from "react";
-import Image from "next/image";
-import { getThumbnailUrl, getAllThumbnail } from "../lib/actions/thumbnail.action";
+const YouTubeThumbnailFetcher = () => {
+  const [videoUrl, setVideoUrl] = useState('');
+  const [thumbnails, setThumbnails] = useState([]);
 
-const UrlInput = () => {
-  const [url, setUrl] = useState("");
-  const [imgsUrl, setImgUrl] = useState([]);
-
-  // Handle URL submission
-  const handleUrlSubmit = useCallback(async (e) => {
-    e.preventDefault();
-
-    // Extract video ID from URL
-    const id = url.split("v=")[1]?.split("&")[0];
-
-    if (!id) {
-      alert("Please enter a valid YouTube URL.");
-      return;
-    }
-
-    const imgurl = `https://img.youtube.com/vi/${id}/sddefault.jpg`;
-
+  const fetchThumbnail = async () => {
     try {
-      // Save the thumbnail URL to the database
-      await getThumbnailUrl({ imgUrl: imgurl });
-
-      // Fetch updated list of thumbnails
-      const updatedThumbnails = await getAllThumbnail();
-      setImgUrl(updatedThumbnails);
-
+      const videoId = getVideoIdFromUrl(videoUrl);
+      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      setThumbnails([...thumbnails, thumbnailUrl]);
     } catch (error) {
-      console.error("Error storing or fetching thumbnail:", error);
+      console.error('Error fetching thumbnail:', error);
     }
+  };
 
-    setUrl(""); // Reset input field
-  }, [url]);
+  const getVideoIdFromUrl = (url) => {
+    const urlParams = new URL(url);
+    const videoId = urlParams.searchParams.get('v');
+    return videoId;
+  };
 
-  // Fetch all thumbnails when component mounts
-  useEffect(() => {
-    const fetchThumbnails = async () => {
-      try {
-        const thumbnails = await getAllThumbnail();
-        setImgUrl(thumbnails);
-      } catch (error) {
-        console.error("Error fetching thumbnails:", error);
-      }
-    };
+  const downloadThumbnail = (thumbnailUrl) => {
+    const link = document.createElement('a');
+    link.href = thumbnailUrl;
+    link.setAttribute('download', 'youtube-thumbnail.jpg');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-    // fetchThumbnails();
-  }, []);
+  const analyzeThumbnail = (thumbnailUrl) => {
+    // Add your thumbnail analysis logic here
+    console.log('Analyzing thumbnail:', thumbnailUrl);
+  };
 
   return (
-    <div className="w-full p-6 rounded-lg bg-[#333] shadow-lg">
-    <h1 className="text-3xl font-bold text-center mb-8">YouTube Thumbnail Generator</h1>
-    <div className="max-w-xl m-auto flex flex-col items-center">
-      <Input
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        className="w-full text-xl p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#555] bg-[#222] border border-[#555] mb-4"
-        placeholder="Enter YouTube URL (e.g., https://www.youtube.com/watch?v=...)"
-      />
-      <Button
-        variant="outline"
-        className="w-full bg-[#D65A31] text-white p-3 rounded-lg hover:bg-[#C04D28] transition duration-300"
-        onClick={handleUrlSubmit}
-      >
-        Generate Thumbnail
-      </Button>
-    </div>
-
-    <div className="flex flex-wrap justify-center gap-5 mt-8">
-      {imgsUrl.length > 0 ? (
-        imgsUrl.map((thumbnail, index) => (
-          <Image
-            key={index}
-            alt="YouTube Thumbnail"
-            src={thumbnail.img}
-            width={400}
-            height={200}
-            className="rounded-lg shadow-lg hover:scale-105 transition-transform duration-300"
+    <Card className="w-full max-w-xl">
+      <CardHeader>
+        <CardTitle>YouTube Thumbnail Fetcher</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center space-x-4">
+          <Input
+            type="text"
+            placeholder="Enter YouTube video URL"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
           />
-        ))
-      ) : (
-        <p className="text-gray-400 text-center mt-5">No thumbnails yet. Submit a URL to generate.</p>
-      )}
-    </div>
-  </div>
+          <Button onClick={fetchThumbnail}>Fetch Thumbnail</Button>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mt-8">
+          {thumbnails.map((thumbnailUrl, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <img src={thumbnailUrl} alt={`Thumbnail ${index}`} className="w-full rounded" />
+              <div className="flex space-x-2 mt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => downloadThumbnail(thumbnailUrl)}
+                >
+                  <Download className="w-5 h-5" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => analyzeThumbnail(thumbnailUrl)}
+                >
+                  <Zap className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter className="text-center">
+        Enter a YouTube video URL and click 'Fetch Thumbnail' to get started.
+      </CardFooter>
+    </Card>
   );
 };
 
-export default UrlInput;
+export default YouTubeThumbnailFetcher;

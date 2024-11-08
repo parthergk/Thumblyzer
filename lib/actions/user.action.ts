@@ -16,8 +16,8 @@ export async function setUser({ clerkId, username, email }: SetUserParams): Prom
     await connectTodb();
     
     // Create the new user document
-    const newUser = await User.create({ clerkId, username, email });
-    
+    const data = await User.create({ clerkId, username, email });
+    const newUser = data.toObject();
     // Return the created user document
     return newUser;
   } catch (error) {
@@ -25,3 +25,21 @@ export async function setUser({ clerkId, username, email }: SetUserParams): Prom
     throw new Error('Failed to create user');
   }
 }
+
+export async function getUserId(clerkId: string) { 
+  try {
+    await connectTodb();
+
+    const user = await User.findOne({ clerkId });
+    if (!user) {
+      return { success: false, error: "User not found" }; // Early return if user not found
+    }
+
+    const userID = user._id.toString(); // Move this line after checking if user exists
+    return { success: true, userId: userID }; // Return the user ID in a structured object
+  } catch (error) {
+    console.error('Error fetching user ID:', error);
+    throw new Error('Failed to retrieve user ID');
+  }
+}
+
